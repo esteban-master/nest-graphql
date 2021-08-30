@@ -3,18 +3,21 @@
 # ------------------------------------------------------
 
 type User {
-  id: String!
+  _id: String!
   username: String!
   name: String!
+  email: String!
   avatar: String
   siteWeb: String
-  desc: String!
+  desc: String
   password: String!
   createdAt: String!
 }
 
 type Query {
   user(userId: String!): User!
+
+  """Obtiene todos los usuarios"""
   users: [User]!
 }
 

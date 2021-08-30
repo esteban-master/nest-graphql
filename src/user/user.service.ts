@@ -1,38 +1,41 @@
-import { Injectable } from '@nestjs/common';
-import { User } from './model/user.model';
-import { v4 as uuidv4 } from 'uuid';
+import { BadRequestException, Injectable } from '@nestjs/common';
+import { User, UserDocument } from './model/user.model';
 import { CreateUserInput } from './dto/input/create-user.input';
 import { GetUserArgs } from './dto/args/user.args';
 import { DeleteUserInput } from './dto/input/delete-user.input';
+import { InjectModel } from '@nestjs/mongoose';
+import { Model } from 'mongoose';
+import { MongoErrors } from 'src/types';
 
 @Injectable()
 export class UserService {
-  private users: User[] = [];
+  constructor(
+    @InjectModel(User.name) private readonly userModel: Model<UserDocument>,
+  ) {}
 
-  public createUser(createUserData: CreateUserInput): User {
-    const user: User = {
-      id: uuidv4(),
-      siteWeb: '',
-      avatar: '',
-      createdAt: Date.now().toString(),
-      desc: '',
-      ...createUserData,
-    };
+  public async createUser(createUserData: CreateUserInput): Promise<User> {
+    createUserData.username.toLowerCase();
+    try {
+      const newUser = new this.userModel(createUserData);
+      return await newUser.save();
+    } catch (error: any) {
+      if (error.code === MongoErrors.DUPLICATE_KEY) {
+        const errorField = Object.keys(error.keyValue)[0];
+        throw new BadRequestException(
+          `${errorField}: '${error.keyValue[errorField]}' ya existe`,
+        );
+      }
+    }
+  }
 
-    this.users.push(user);
-    return user;
+  public getUser({ userId }: GetUserArgs): Promise<User> {
+    return this.userModel.findById({ _id: userId }).exec();
   }
-  // public updateUser(): User {}
-  public getUser({ userId }: GetUserArgs): User {
-    return this.users.find((user) => user.id === userId);
+  public getUsers(): Promise<User[]> {
+    return this.userModel.find().exec();
   }
-  public getUsers(): User[] {
-    return this.users;
-  }
-  public deleteUser({ id }: DeleteUserInput): User {
-    const userIndex = this.users.findIndex((user) => user.id === id);
-    const user = this.users[userIndex];
-    this.users.splice(userIndex);
-    return user;
+
+  public deleteUser({ id }: DeleteUserInput): Promise<User> {
+    return this.userModel.findByIdAndRemove({ _id: id }).exec();
   }
 }
