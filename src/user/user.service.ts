@@ -50,7 +50,8 @@ export class UserService {
     const user = await this.findByEmail(email);
     const passwordMatch = await this.comparePassword(password, user.password);
 
-    if (!passwordMatch) throw new UnauthorizedException('Password incorrecto');
+    if (!passwordMatch)
+      throw new UnauthorizedException('Error en el email o password');
 
     user.password = undefined;
     return user;
@@ -66,7 +67,7 @@ export class UserService {
 
   public async findByEmail(email: string): Promise<User> {
     const usuario = await this.userModel.findOne({ email });
-    if (!usuario) throw new NotFoundException(`${email} no encontrado`);
+    if (!usuario) throw new NotFoundException('Error en el email o password');
     return usuario;
   }
 
