@@ -6,5 +6,5 @@ import { IsNotEmpty } from 'class-validator';
 export class DeleteUserInput {
   @Field()
   @IsNotEmpty()
-  id: string;
+  _id: string;
 }

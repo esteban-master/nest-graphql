@@ -14,6 +14,11 @@ type User {
   createdAt: String!
 }
 
+type Login {
+  user: User!
+  token: String!
+}
+
 type Query {
   user(userId: String!): User!
 
@@ -24,6 +29,7 @@ type Query {
 type Mutation {
   createUser(createUserData: CreateUserInput!): User!
   deleteUser(deleteUserData: DeleteUserInput!): User!
+  login(loginUserData: LoginUserInput!): Login!
 }
 
 input CreateUserInput {
@@ -34,5 +40,10 @@ input CreateUserInput {
 }
 
 input DeleteUserInput {
-  id: String!
+  _id: String!
+}
+
+input LoginUserInput {
+  email: String!
+  password: String!
 }
