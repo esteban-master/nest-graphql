@@ -3,7 +3,9 @@ import { NotFoundException, Post, UseGuards } from '@nestjs/common';
 import { Args, Mutation, Query, Resolver } from '@nestjs/graphql';
 import { CurrentUser } from 'src/user/decorators/user.decorator';
 import { JwtAuthGuard } from 'src/user/guards/jwt-auth.guard';
+import { SearchArg } from './dto/args/search.args';
 import { GetUserArgs } from './dto/args/user.args';
+import { GetUsernameArg } from './dto/args/username.args';
 import { CreateUserInput } from './dto/input/create-user.input';
 import { DeleteUserInput } from './dto/input/delete-user.input';
 import { LoginUserInput } from './dto/input/login-user.input';
@@ -15,20 +17,26 @@ import { UserService } from './user.service';
 export class UserResolver {
   constructor(private readonly userService: UserService) {}
 
-  @Query(() => User, { name: 'user' })
-  async getUser(@Args() getUserArgs: GetUserArgs) {
+  @Query(() => User, { name: 'userById' })
+  async getUserById(@Args() getUserArgs: GetUserArgs) {
     const user = await this.userService.getUserById(getUserArgs);
+    if (!user) throw new NotFoundException('Usuario no encontrado');
+    return user;
+  }
+  @Query(() => User, { name: 'userByUsername' })
+  async getUserByUsername(@Args() getUsernameArgs: GetUsernameArg) {
+    const user = await this.userService.getUserByUsername(getUsernameArgs);
     if (!user) throw new NotFoundException('Usuario no encontrado');
     return user;
   }
 
   @Query(() => [User], {
-    name: 'users',
+    name: 'searchUsers',
     nullable: 'items',
-    description: 'Obtiene todos los usuarios',
+    description: 'Obtiene busqueda de los usuario por nombre',
   })
-  getUsers() {
-    return this.userService.getUsers();
+  searchUsers(@Args() searchArgs: SearchArg) {
+    return this.userService.searchUsers(searchArgs);
   }
 
   @Mutation(() => User)

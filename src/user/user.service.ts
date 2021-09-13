@@ -14,6 +14,8 @@ import { JwtService } from '@nestjs/jwt';
 import { Model } from 'mongoose';
 import { compare } from 'bcrypt';
 import { MongoErrors } from 'src/types';
+import { GetUsernameArg } from './dto/args/username.args';
+import { SearchArg } from './dto/args/search.args';
 
 @Injectable()
 export class UserService {
@@ -31,7 +33,7 @@ export class UserService {
       if (error.code === MongoErrors.DUPLICATE_KEY) {
         const errorField = Object.keys(error.keyValue)[0];
         throw new BadRequestException(
-          `${errorField}: '${error.keyValue[errorField]}' ya existe`,
+          `${error.keyValue[errorField]} ya existe`,
         );
       }
     }
@@ -60,9 +62,16 @@ export class UserService {
   public getUserById({ userId }: GetUserArgs): Promise<User> {
     return this.userModel.findById({ _id: userId }).exec();
   }
+  public getUserByUsername({ username }: GetUsernameArg): Promise<User> {
+    return this.userModel.findOne({ username }).exec();
+  }
 
-  public getUsers(): Promise<User[]> {
-    return this.userModel.find().exec();
+  public searchUsers({ search }: SearchArg): Promise<User[]> {
+    return this.userModel
+      .find({
+        name: { $regex: search, $options: 'i' },
+      })
+      .exec();
   }
 
   public async findByEmail(email: string): Promise<User> {

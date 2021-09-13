@@ -20,10 +20,11 @@ type Login {
 }
 
 type Query {
-  user(userId: String!): User!
+  userById(userId: String!): User!
+  userByUsername(username: String!): User!
 
-  """Obtiene todos los usuarios"""
-  users: [User]!
+  """Obtiene busqueda de los usuario por nombre"""
+  searchUsers(search: String!): [User]!
 }
 
 type Mutation {
