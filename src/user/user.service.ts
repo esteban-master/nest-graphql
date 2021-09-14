@@ -80,6 +80,16 @@ export class UserService {
     return usuario;
   }
 
+  public async findByUsername(username: string): Promise<User> {
+    const usuario = await this.userModel.findOne({ username });
+    if (!usuario) throw new NotFoundException('Usuario no encontrado');
+    return usuario;
+  }
+
+  public async updateUser(filters: any, update: any, options: any) {
+    return await this.userModel.updateOne(filters, update, options);
+  }
+
   public deleteUser(
     userRequest: User,
     { _id }: DeleteUserInput,

@@ -7,12 +7,19 @@ type User {
   username: String!
   name: String!
   email: String!
+  followers: Int!
+  following: Int!
   avatar: String
   siteWeb: String
   desc: String
   password: String!
-  createdAt: String!
+  createdAt: DateTime!
 }
+
+"""
+A date-time string at UTC, such as 2019-12-03T09:54:33Z, compliant with the date-time format.
+"""
+scalar DateTime
 
 type Login {
   user: User!
@@ -25,12 +32,14 @@ type Query {
 
   """Obtiene busqueda de los usuario por nombre"""
   searchUsers(search: String!): [User]!
+  isfollow(_id: String!): Boolean!
 }
 
 type Mutation {
   createUser(createUserData: CreateUserInput!): User!
   deleteUser(deleteUserData: DeleteUserInput!): User!
   login(loginUserData: LoginUserInput!): Login!
+  follow(_id: String!): Boolean!
 }
 
 input CreateUserInput {

@@ -1,5 +1,5 @@
 /* eslint-disable prettier/prettier */
-import { NotFoundException, Post, UseGuards } from '@nestjs/common';
+import { NotFoundException, UseGuards } from '@nestjs/common';
 import { Args, Mutation, Query, Resolver } from '@nestjs/graphql';
 import { CurrentUser } from 'src/user/decorators/user.decorator';
 import { JwtAuthGuard } from 'src/user/guards/jwt-auth.guard';
@@ -23,6 +23,7 @@ export class UserResolver {
     if (!user) throw new NotFoundException('Usuario no encontrado');
     return user;
   }
+
   @Query(() => User, { name: 'userByUsername' })
   async getUserByUsername(@Args() getUsernameArgs: GetUsernameArg) {
     const user = await this.userService.getUserByUsername(getUsernameArgs);

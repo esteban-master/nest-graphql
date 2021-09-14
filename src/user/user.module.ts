@@ -12,7 +12,6 @@ import { JwtStrategy } from './passport-strategies/jwt.strategy';
 @Module({
   imports: [
     ConfigModule,
-
     MongooseModule.forFeatureAsync([
       {
         name: User.name,

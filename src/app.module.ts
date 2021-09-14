@@ -4,6 +4,7 @@ import { GraphQLModule } from '@nestjs/graphql';
 import { UserModule } from './user/user.module';
 import { DatabaseModule } from './config/database/database.module';
 import { ConfigModule } from '@nestjs/config';
+import { FollowModule } from './follow/follow.module';
 import databaseConfig from './config/database/database.config';
 import jwtConfig from './config/database/jwt.config';
 
@@ -18,6 +19,7 @@ import jwtConfig from './config/database/jwt.config';
     }),
     DatabaseModule,
     UserModule,
+    FollowModule,
   ],
   controllers: [],
   providers: [],

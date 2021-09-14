@@ -1,7 +1,7 @@
 /* eslint-disable prettier/prettier */
-import { Field, ObjectType } from '@nestjs/graphql';
+import { Field, Int, ObjectType } from '@nestjs/graphql';
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
-import { IsEmail, IsNotEmpty, IsOptional } from 'class-validator';
+import { IsEmail, IsNotEmpty, IsOptional, IsNumber } from 'class-validator';
 import { Document } from 'mongoose';
 
 export type UserDocument = User & Document;
@@ -29,6 +29,18 @@ export class User extends Document {
   @IsEmail()
   email: string;
 
+  @Prop({ required: true, default: 0 })
+  @Field((type) => Int)
+  @IsNotEmpty()
+  @IsNumber()
+  followers: number;
+
+  @Prop({ required: true, default: 0 })
+  @Field((type) => Int)
+  @IsNotEmpty()
+  @IsNumber()
+  following: number;
+
   @Prop()
   @Field({ nullable: true })
   @IsOptional()
@@ -49,9 +61,9 @@ export class User extends Document {
   @IsNotEmpty()
   password: string;
 
-  @Prop({ default: Date.now })
+  @Prop({ type: Date, default: Date.now })
   @Field()
-  createdAt: string;
+  createdAt: Date;
 }
 
 export const UserSchema = SchemaFactory.createForClass(User);
