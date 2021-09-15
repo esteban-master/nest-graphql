@@ -1,8 +1,7 @@
-/* eslint-disable prettier/prettier */
-import { Field, ObjectType } from '@nestjs/graphql';
-import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
-import { IsNotEmpty } from 'class-validator';
-import { Document, Schema as SchemaMongo } from 'mongoose';
+import { Field, ObjectType } from "@nestjs/graphql";
+import { Prop, Schema, SchemaFactory } from "@nestjs/mongoose";
+import { IsNotEmpty } from "class-validator";
+import { Document, Schema as SchemaMongo } from "mongoose";
 
 export type FollowDocument = Follow & Document;
 
@@ -13,12 +12,12 @@ export class Follow extends Document {
   @IsNotEmpty()
   _id: string;
 
-  @Prop({ type: SchemaMongo.Types.ObjectId, ref: 'User' })
+  @Prop({ type: SchemaMongo.Types.ObjectId, ref: "User" })
   @Field()
   @IsNotEmpty()
   userId: string;
 
-  @Prop({ type: SchemaMongo.Types.ObjectId, ref: 'User' })
+  @Prop({ type: SchemaMongo.Types.ObjectId, ref: "User" })
   @Field()
   @IsNotEmpty()
   follow: string;

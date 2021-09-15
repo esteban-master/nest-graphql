@@ -1,27 +1,26 @@
-/* eslint-disable prettier/prettier */
 import {
   BadRequestException,
   Injectable,
   NotFoundException,
   UnauthorizedException,
-} from '@nestjs/common';
-import { User, UserDocument } from './model/user.model';
-import { CreateUserInput } from './dto/input/create-user.input';
-import { GetUserArgs } from './dto/args/user.args';
-import { DeleteUserInput } from './dto/input/delete-user.input';
-import { InjectModel } from '@nestjs/mongoose';
-import { JwtService } from '@nestjs/jwt';
-import { Model } from 'mongoose';
-import { compare } from 'bcrypt';
-import { MongoErrors } from 'src/types';
-import { GetUsernameArg } from './dto/args/username.args';
-import { SearchArg } from './dto/args/search.args';
+} from "@nestjs/common";
+import { User, UserDocument } from "./model/user.model";
+import { CreateUserInput } from "./dto/input/create-user.input";
+import { GetUserArgs } from "./dto/args/user.args";
+import { DeleteUserInput } from "./dto/input/delete-user.input";
+import { InjectModel } from "@nestjs/mongoose";
+import { JwtService } from "@nestjs/jwt";
+import { Model } from "mongoose";
+import { compare } from "bcrypt";
+import { MongoErrors } from "src/types";
+import { GetUsernameArg } from "./dto/args/username.args";
+import { SearchArg } from "./dto/args/search.args";
 
 @Injectable()
 export class UserService {
   constructor(
     @InjectModel(User.name) private readonly userModel: Model<UserDocument>,
-    private jwtService: JwtService,
+    private jwtService: JwtService
   ) {}
 
   public async createUser(createUserData: CreateUserInput): Promise<User> {
@@ -33,7 +32,7 @@ export class UserService {
       if (error.code === MongoErrors.DUPLICATE_KEY) {
         const errorField = Object.keys(error.keyValue)[0];
         throw new BadRequestException(
-          `${error.keyValue[errorField]} ya existe`,
+          `${error.keyValue[errorField]} ya existe`
         );
       }
     }
@@ -53,7 +52,7 @@ export class UserService {
     const passwordMatch = await this.comparePassword(password, user.password);
 
     if (!passwordMatch)
-      throw new UnauthorizedException('Error en el email o password');
+      throw new UnauthorizedException("Error en el email o password");
 
     user.password = undefined;
     return user;
@@ -69,20 +68,20 @@ export class UserService {
   public searchUsers({ search }: SearchArg): Promise<User[]> {
     return this.userModel
       .find({
-        name: { $regex: search, $options: 'i' },
+        name: { $regex: search, $options: "i" },
       })
       .exec();
   }
 
   public async findByEmail(email: string): Promise<User> {
     const usuario = await this.userModel.findOne({ email });
-    if (!usuario) throw new NotFoundException('Error en el email o password');
+    if (!usuario) throw new NotFoundException("Error en el email o password");
     return usuario;
   }
 
   public async findByUsername(username: string): Promise<User> {
     const usuario = await this.userModel.findOne({ username });
-    if (!usuario) throw new NotFoundException('Usuario no encontrado');
+    if (!usuario) throw new NotFoundException("Usuario no encontrado");
     return usuario;
   }
 
@@ -92,7 +91,7 @@ export class UserService {
 
   public deleteUser(
     userRequest: User,
-    { _id }: DeleteUserInput,
+    { _id }: DeleteUserInput
   ): Promise<User> {
     if (userRequest._id.toString() !== _id.toString())
       throw new UnauthorizedException(`No eres propietario de la cuenta`);

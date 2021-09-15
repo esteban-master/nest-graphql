@@ -1,6 +1,5 @@
-/* eslint-disable prettier/prettier */
-import { Field, ObjectType } from '@nestjs/graphql';
-import { User } from 'src/user/model/user.model';
+import { Field, ObjectType } from "@nestjs/graphql";
+import { User } from "src/user/model/user.model";
 
 @ObjectType()
 export class Login {

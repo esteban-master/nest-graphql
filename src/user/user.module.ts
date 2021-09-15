@@ -1,13 +1,12 @@
-/* eslint-disable prettier/prettier */
-import { Module } from '@nestjs/common';
-import { MongooseModule } from '@nestjs/mongoose';
-import { JwtModule } from '@nestjs/jwt';
-import { User, UserSchema } from './model/user.model';
-import { UserResolver } from './user.resolver';
-import { UserService } from './user.service';
-import { hashSync } from 'bcrypt';
-import { ConfigModule, ConfigService } from '@nestjs/config';
-import { JwtStrategy } from './passport-strategies/jwt.strategy';
+import { Module } from "@nestjs/common";
+import { MongooseModule } from "@nestjs/mongoose";
+import { JwtModule } from "@nestjs/jwt";
+import { User, UserSchema } from "./model/user.model";
+import { UserResolver } from "./user.resolver";
+import { UserService } from "./user.service";
+import { hashSync } from "bcrypt";
+import { ConfigModule, ConfigService } from "@nestjs/config";
+import { JwtStrategy } from "./passport-strategies/jwt.strategy";
 
 @Module({
   imports: [
@@ -17,8 +16,8 @@ import { JwtStrategy } from './passport-strategies/jwt.strategy';
         name: User.name,
         useFactory: () => {
           const schema = UserSchema;
-          schema.pre('save', async function (next) {
-            if (this.isModified('password')) {
+          schema.pre("save", async function (next) {
+            if (this.isModified("password")) {
               this.password = hashSync(this.password, 10);
               next();
             }
@@ -32,9 +31,9 @@ import { JwtStrategy } from './passport-strategies/jwt.strategy';
       imports: [ConfigModule],
       useFactory: async (configService: ConfigService) => {
         return {
-          secret: configService.get('jwt_config.secret'),
+          secret: configService.get("jwt_config.secret"),
           signOptions: {
-            expiresIn: configService.get('jwt_config.expire'),
+            expiresIn: configService.get("jwt_config.expire"),
           },
         };
       },

@@ -1,8 +1,7 @@
-/* eslint-disable prettier/prettier */
-import { Field, Int, ObjectType } from '@nestjs/graphql';
-import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
-import { IsEmail, IsNotEmpty, IsOptional, IsNumber } from 'class-validator';
-import { Document } from 'mongoose';
+import { Field, Int, ObjectType } from "@nestjs/graphql";
+import { Prop, Schema, SchemaFactory } from "@nestjs/mongoose";
+import { IsEmail, IsNotEmpty, IsOptional, IsNumber } from "class-validator";
+import { Document } from "mongoose";
 
 export type UserDocument = User & Document;
 
