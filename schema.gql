@@ -26,6 +26,30 @@ type Login {
   token: String!
 }
 
+type Follow {
+  user: User
+  follow: User
+}
+
+type UnFollow {
+  user: User
+  unFollow: User
+}
+
+type Follower {
+  _id: String!
+  follow: String!
+  userId: User!
+  createdAt: DateTime!
+}
+
+type Following {
+  _id: String!
+  follow: User!
+  userId: String!
+  createdAt: DateTime!
+}
+
 type Query {
   userById(userId: String!): User!
   userByUsername(username: String!): User!
@@ -33,14 +57,16 @@ type Query {
   """Obtiene busqueda de los usuario por nombre"""
   searchUsers(search: String!): [User]!
   isfollow(_id: String!): Boolean!
+  followers(idUser: String!): [Follower!]!
+  following(idUser: String!): [Following!]!
 }
 
 type Mutation {
   createUser(createUserData: CreateUserInput!): User!
   deleteUser(deleteUserData: DeleteUserInput!): User!
   login(loginUserData: LoginUserInput!): Login!
-  follow(_id: String!): Boolean!
-  unFollow(_id: String!): Boolean!
+  follow(_id: String!): Follow!
+  unFollow(_id: String!): UnFollow!
 }
 
 input CreateUserInput {

@@ -18,6 +18,12 @@ export class FollowService {
     if (_idFollow.toString() === userRequest._id.toString()) {
       throw new BadRequestException("Operacion no permitida");
     }
+
+    let followReturn = {
+      user: null,
+      follow: null,
+    };
+
     const session = await this.connection.startSession();
     try {
       const transactionResults = await session.withTransaction(
@@ -29,23 +35,32 @@ export class FollowService {
               return;
             }
 
-            await this.userService.updateUser(
+            const userReqUpdate = await this.userService.updateUser(
               { username: userRequest.username },
               { $inc: { following: 1 } },
-              { session }
+              { session, new: true }
             );
-            await this.userService.updateUser(
+            const userFollowUpdate = await this.userService.updateUser(
               { _id: _idFollow },
               { $inc: { followers: 1 } },
-              { session }
+              { session, new: true }
             );
 
             const newFollow = new this.followModel({
               userId: userRequest._id,
               follow: _idFollow,
             });
+
+            followReturn = {
+              user: userReqUpdate,
+              follow: userFollowUpdate,
+            };
             return await newFollow.save({ session });
           } catch (error) {
+            followReturn = {
+              user: null,
+              follow: null,
+            };
             await session.abortTransaction();
           }
         },
@@ -58,10 +73,10 @@ export class FollowService {
 
       if (transactionResults) {
         console.log("The FOLLOW was successfully created.");
-        return true;
+        return followReturn;
       } else {
         console.log("The transaction was intentionally ABORTED.");
-        return false;
+        return followReturn;
       }
     } catch (error) {
       console.log("Sesion abortada por un error");
@@ -81,6 +96,10 @@ export class FollowService {
 
   public async unFollow(_idFollow: string, userRequest: User) {
     const session = await this.connection.startSession();
+    let unfollowReturn = {
+      user: null,
+      unFollow: null,
+    };
     try {
       const transactionResults = await session.withTransaction(
         async () => {
@@ -94,18 +113,27 @@ export class FollowService {
               return;
             }
 
-            await this.userService.updateUser(
+            const userReqUpdate = await this.userService.updateUser(
               { username: userRequest.username },
               { $inc: { following: -1 } },
-              { session }
+              { session, new: true }
             );
-            await this.userService.updateUser(
+            const userUnFollowUpdate = await this.userService.updateUser(
               { _id: _idFollow },
               { $inc: { followers: -1 } },
-              { session }
+              { session, new: true }
             );
+
+            unfollowReturn = {
+              user: userReqUpdate,
+              unFollow: userUnFollowUpdate,
+            };
             return await followFound.remove({ session });
           } catch (error) {
+            unfollowReturn = {
+              user: null,
+              unFollow: null,
+            };
             await session.abortTransaction();
           }
         },
@@ -118,10 +146,10 @@ export class FollowService {
 
       if (transactionResults) {
         console.log("The UN_FOLLOW was successfully created.");
-        return true;
+        return unfollowReturn;
       } else {
         console.log("The transaction was intentionally ABORTED.");
-        return false;
+        return unfollowReturn;
       }
     } catch (error) {
       console.log("Sesion abortada por un error");
@@ -129,5 +157,13 @@ export class FollowService {
       console.log("Session finalizada");
       await session.endSession();
     }
+  }
+
+  public async getFollowers(idUser: string) {
+    return await this.followModel.find({ follow: idUser }).populate("userId");
+  }
+
+  public async getFollowing(idUser: string) {
+    return await this.followModel.find({ userId: idUser }).populate("follow");
   }
 }

@@ -86,7 +86,7 @@ export class UserService {
   }
 
   public async updateUser(filters: any, update: any, options: any) {
-    return await this.userModel.updateOne(filters, update, options);
+    return await this.userModel.findOneAndUpdate(filters, update, options);
   }
 
   public deleteUser(

@@ -1,27 +1,32 @@
 import { UseGuards } from "@nestjs/common";
 import { Args, Mutation, Resolver, Query } from "@nestjs/graphql";
+import { IsValidId } from "src/common/pipes/isValidId.pipe";
 import { CurrentUser } from "src/user/decorators/user.decorator";
 import { JwtAuthGuard } from "src/user/guards/jwt-auth.guard";
 import { User } from "src/user/model/user.model";
+import { Follow } from "./dto/follow-type";
+import { UnFollow } from "./dto/unFollow-type";
+import { Follower } from "./dto/followers-type";
+import { Following } from "./dto/following-type";
 import { FollowService } from "./follow.service";
 
 @Resolver()
 export class FollowResolver {
   constructor(private readonly followService: FollowService) {}
 
-  @Mutation(() => Boolean)
+  @Mutation(() => Follow)
   @UseGuards(JwtAuthGuard)
   async follow(
-    @Args("_id", { type: () => String }) _id: string,
+    @Args("_id", { type: () => String }, IsValidId) _id: string,
     @CurrentUser() userRequest: User
   ) {
     return await this.followService.follow(_id, userRequest);
   }
 
-  @Mutation(() => Boolean)
+  @Mutation(() => UnFollow)
   @UseGuards(JwtAuthGuard)
   async unFollow(
-    @Args("_id", { type: () => String }) _id: string,
+    @Args("_id", { type: () => String }, IsValidId) _id: string,
     @CurrentUser() userRequest: User
   ) {
     return await this.followService.unFollow(_id, userRequest);
@@ -30,10 +35,24 @@ export class FollowResolver {
   @Query(() => Boolean)
   @UseGuards(JwtAuthGuard)
   async isfollow(
-    @Args("_id", { type: () => String }) _id: string,
+    @Args("_id", { type: () => String }, IsValidId) _id: string,
     @CurrentUser() userRequest: User
   ) {
     const isFollow = await this.followService.isFollow(_id, userRequest._id);
     return !!isFollow;
+  }
+
+  @Query(() => [Follower])
+  async followers(
+    @Args("idUser", { type: () => String }, IsValidId) idUser: string
+  ) {
+    return await this.followService.getFollowers(idUser);
+  }
+
+  @Query(() => [Following])
+  async following(
+    @Args("idUser", { type: () => String }, IsValidId) idUser: string
+  ) {
+    return await this.followService.getFollowing(idUser);
   }
 }
