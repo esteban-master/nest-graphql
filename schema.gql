@@ -12,7 +12,7 @@ type User {
   avatar: String
   siteWeb: String
   desc: String
-  password: String!
+  password: String
   createdAt: DateTime!
 }
 
@@ -50,6 +50,15 @@ type Following {
   createdAt: DateTime!
 }
 
+type Post {
+  _id: String!
+  text: String
+  photo: String!
+  likes: [User!]!
+  postedBy: User!
+  createdAt: DateTime!
+}
+
 type Query {
   userById(userId: String!): User!
   userByUsername(username: String!): User!
@@ -59,6 +68,7 @@ type Query {
   isfollow(_id: String!): Boolean!
   followers(idUser: String!): [Follower!]!
   following(idUser: String!): [Following!]!
+  postsByUsername(username: String!): [Post!]!
 }
 
 type Mutation {
@@ -67,6 +77,7 @@ type Mutation {
   login(loginUserData: LoginUserInput!): Login!
   follow(_id: String!): Follow!
   unFollow(_id: String!): UnFollow!
+  createPost(createPostData: CreatePostInput!): Post!
 }
 
 input CreateUserInput {
@@ -83,4 +94,10 @@ input DeleteUserInput {
 input LoginUserInput {
   email: String!
   password: String!
+}
+
+input CreatePostInput {
+  text: String
+  photo: String!
+  postedBy: String!
 }

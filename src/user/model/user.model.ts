@@ -29,13 +29,13 @@ export class User extends Document {
   email: string;
 
   @Prop({ required: true, default: 0 })
-  @Field((type) => Int)
+  @Field(() => Int)
   @IsNotEmpty()
   @IsNumber()
   followers: number;
 
   @Prop({ required: true, default: 0 })
-  @Field((type) => Int)
+  @Field(() => Int)
   @IsNotEmpty()
   @IsNumber()
   following: number;
@@ -55,10 +55,10 @@ export class User extends Document {
   @IsOptional()
   desc?: string;
 
-  @Prop()
-  @Field()
+  @Prop({ required: true })
+  @Field({ nullable: true })
   @IsNotEmpty()
-  password: string;
+  password?: string;
 
   @Prop({ type: Date, default: Date.now })
   @Field()
