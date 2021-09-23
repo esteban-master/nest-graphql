@@ -163,7 +163,17 @@ export class FollowService {
     return await this.followModel.find({ follow: idUser }).populate("userId");
   }
 
-  public async getFollowing(idUser: string) {
-    return await this.followModel.find({ userId: idUser }).populate("follow");
+  public async getFollowing(idUser: string, cursor: string) {
+    if (!cursor) {
+      return await this.followModel
+        .find({ userId: idUser })
+        .limit(10)
+        .populate("follow");
+    }
+
+    return await this.followModel
+      .find({ userId: idUser, _id: { $gt: cursor } })
+      .limit(10)
+      .populate("follow");
   }
 }

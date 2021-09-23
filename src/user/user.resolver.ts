@@ -25,9 +25,7 @@ export class UserResolver {
 
   @Query(() => User, { name: "userByUsername" })
   async getUserByUsername(@Args() getUsernameArgs: GetUsernameArg) {
-    const user = await this.userService.getUserByUsername(getUsernameArgs);
-    if (!user) throw new NotFoundException("Usuario no encontrado");
-    return user;
+    return await this.userService.getUserByUsername(getUsernameArgs);
   }
 
   @Query(() => [User], {

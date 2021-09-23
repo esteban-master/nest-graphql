@@ -50,6 +50,11 @@ type Following {
   createdAt: DateTime!
 }
 
+type FollowingPaginate {
+  data: [Following!]!
+  nextCursor: String
+}
+
 type Post {
   _id: String!
   text: String
@@ -61,13 +66,13 @@ type Post {
 
 type Query {
   userById(userId: String!): User!
-  userByUsername(username: String!): User!
+  userByUsername(username: String!, userReq: String): User!
 
   """Obtiene busqueda de los usuario por nombre"""
   searchUsers(search: String!): [User]!
   isfollow(_id: String!): Boolean!
   followers(idUser: String!): [Follower!]!
-  following(idUser: String!): [Following!]!
+  following(cursor: String, idUser: String!): FollowingPaginate!
   postsByUsername(username: String!): [Post!]!
 }
 

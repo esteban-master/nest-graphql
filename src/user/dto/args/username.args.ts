@@ -6,4 +6,7 @@ export class GetUsernameArg {
   @Field()
   @IsNotEmpty()
   username: string;
+
+  @Field({ nullable: true })
+  userReq: string;
 }

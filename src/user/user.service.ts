@@ -61,8 +61,13 @@ export class UserService {
   public getUserById({ userId }: GetUserArgs): Promise<User> {
     return this.userModel.findById({ _id: userId }).exec();
   }
-  public getUserByUsername({ username }: GetUsernameArg): Promise<User> {
-    return this.userModel.findOne({ username }).exec();
+  public async getUserByUsername({
+    username,
+    userReq,
+  }: GetUsernameArg): Promise<User> {
+    const user = await this.userModel.findOne({ username }).exec();
+    if (!user) throw new NotFoundException("Usuario no encontrado");
+    return user;
   }
 
   public searchUsers({ search }: SearchArg): Promise<User[]> {

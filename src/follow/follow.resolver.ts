@@ -9,6 +9,7 @@ import { UnFollow } from "./dto/unFollow-type";
 import { Follower } from "./dto/followers-type";
 import { Following } from "./dto/following-type";
 import { FollowService } from "./follow.service";
+import { FollowingPaginate } from "./dto/followingPaginate-type";
 
 @Resolver()
 export class FollowResolver {
@@ -49,10 +50,15 @@ export class FollowResolver {
     return await this.followService.getFollowers(idUser);
   }
 
-  @Query(() => [Following])
+  @Query(() => FollowingPaginate)
   async following(
-    @Args("idUser", { type: () => String }, IsValidId) idUser: string
+    @Args("idUser", { type: () => String }, IsValidId) idUser: string,
+    @Args("cursor", { type: () => String, nullable: true }) cursor?: string
   ) {
-    return await this.followService.getFollowing(idUser);
+    const following = await this.followService.getFollowing(idUser, cursor);
+    return {
+      data: following,
+      nextCursor: following[9] ? following[9]._id : null,
+    };
   }
 }
