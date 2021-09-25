@@ -26,6 +26,11 @@ type Login {
   token: String!
 }
 
+type Username {
+  user: User!
+  isFollow: Boolean
+}
+
 type Follow {
   user: User
   follow: User
@@ -46,8 +51,8 @@ type Follower {
 type Following {
   _id: String!
   follow: User!
-  userId: String!
   createdAt: DateTime!
+  isFollow: Boolean!
 }
 
 type FollowingPaginate {
@@ -66,13 +71,12 @@ type Post {
 
 type Query {
   userById(userId: String!): User!
-  userByUsername(username: String!, userReq: String): User!
+  userByUsername(username: String!, userReq: String): Username!
 
   """Obtiene busqueda de los usuario por nombre"""
   searchUsers(search: String!): [User]!
-  isfollow(_id: String!): Boolean!
   followers(idUser: String!): [Follower!]!
-  following(cursor: String, idUser: String!): FollowingPaginate!
+  following(cursor: String, idUserReq: String!, idUser: String!): FollowingPaginate!
   postsByUsername(username: String!): [Post!]!
 }
 

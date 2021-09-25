@@ -7,10 +7,12 @@ import { UserService } from "./user.service";
 import { hashSync } from "bcrypt";
 import { ConfigModule, ConfigService } from "@nestjs/config";
 import { JwtStrategy } from "./passport-strategies/jwt.strategy";
+import { FollowModule } from "src/follow/follow.module";
 
 @Module({
   imports: [
     ConfigModule,
+    forwardRef(() => FollowModule),
     MongooseModule.forFeatureAsync([
       {
         name: User.name,

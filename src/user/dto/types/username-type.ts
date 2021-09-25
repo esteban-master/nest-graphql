@@ -2,16 +2,10 @@ import { Field, ObjectType } from "@nestjs/graphql";
 import { User } from "src/user/model/user.model";
 
 @ObjectType()
-export class Following {
-  @Field()
-  _id: string;
-
+export class Username {
   @Field(() => User)
-  follow: User;
+  user: User;
 
-  @Field()
-  createdAt: Date;
-
-  @Field()
+  @Field({ nullable: true })
   isFollow: boolean;
 }

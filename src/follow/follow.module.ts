@@ -7,14 +7,15 @@ import { UserModule } from "src/user/user.module";
 
 @Module({
   imports: [
+    forwardRef(() => UserModule),
     MongooseModule.forFeature([
       {
         name: Follow.name,
         schema: FollowSchema,
       },
     ]),
-    UserModule,
   ],
   providers: [FollowResolver, FollowService],
+  exports: [FollowService],
 })
 export class FollowModule {}

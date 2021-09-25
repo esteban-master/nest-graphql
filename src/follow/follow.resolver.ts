@@ -33,15 +33,15 @@ export class FollowResolver {
     return await this.followService.unFollow(_id, userRequest);
   }
 
-  @Query(() => Boolean)
-  @UseGuards(JwtAuthGuard)
-  async isfollow(
-    @Args("_id", { type: () => String }, IsValidId) _id: string,
-    @CurrentUser() userRequest: User
-  ) {
-    const isFollow = await this.followService.isFollow(_id, userRequest._id);
-    return !!isFollow;
-  }
+  // @Query(() => Boolean)
+  // @UseGuards(JwtAuthGuard)
+  // async isfollow(
+  //   @Args("_id", { type: () => String }, IsValidId) _id: string,
+  //   @CurrentUser() userRequest: User
+  // ) {
+  //   const isFollow = await this.followService.isFollow(_id, userRequest._id);
+  //   return !!isFollow;
+  // }
 
   @Query(() => [Follower])
   async followers(
@@ -53,9 +53,12 @@ export class FollowResolver {
   @Query(() => FollowingPaginate)
   async following(
     @Args("idUser", { type: () => String }, IsValidId) idUser: string,
+    @Args("idUserReq", { type: () => String }, IsValidId) idUserReq: string,
     @Args("cursor", { type: () => String, nullable: true }) cursor?: string
   ) {
-    const following = await this.followService.getFollowing(idUser, cursor);
+    const following = await Promise.all(
+      await this.followService.getFollowing(idUser, idUserReq, cursor)
+    );
     return {
       data: following,
       nextCursor: following[9] ? following[9]._id : null,

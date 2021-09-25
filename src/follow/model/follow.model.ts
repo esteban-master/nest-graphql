@@ -2,6 +2,7 @@ import { Field, ObjectType } from "@nestjs/graphql";
 import { Prop, Schema, SchemaFactory } from "@nestjs/mongoose";
 import { IsNotEmpty } from "class-validator";
 import { Document, Schema as SchemaMongo } from "mongoose";
+import { User } from "src/user/model/user.model";
 
 export type FollowDocument = Follow & Document;
 
@@ -13,12 +14,12 @@ export class Follow extends Document {
   _id: string;
 
   @Prop({ type: SchemaMongo.Types.ObjectId, ref: "User" })
-  @Field()
+  @Field(() => User)
   @IsNotEmpty()
   userId: string;
 
   @Prop({ type: SchemaMongo.Types.ObjectId, ref: "User" })
-  @Field()
+  @Field(() => User)
   @IsNotEmpty()
   follow: string;
 

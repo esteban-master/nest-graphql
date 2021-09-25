@@ -1,4 +1,9 @@
-import { BadRequestException, Injectable } from "@nestjs/common";
+import {
+  BadRequestException,
+  forwardRef,
+  Inject,
+  Injectable,
+} from "@nestjs/common";
 import { InjectModel, InjectConnection } from "@nestjs/mongoose";
 import { Model, Connection } from "mongoose";
 import { User } from "src/user/model/user.model";
@@ -10,6 +15,7 @@ export class FollowService {
   constructor(
     @InjectModel(Follow.name)
     private readonly followModel: Model<FollowDocument>,
+    @Inject(forwardRef(() => UserService))
     private readonly userService: UserService,
     @InjectConnection() private connection: Connection
   ) {}
@@ -86,12 +92,36 @@ export class FollowService {
     }
   }
 
-  public async isFollow(idFollow: string, userIdRequest: string) {
-    const found = await this.followModel.findOne({
-      userId: userIdRequest,
-      follow: idFollow,
-    });
-    return found;
+  public async isFollow(
+    followModel: Follow,
+    idUserReq: string
+  ): Promise<{
+    _id: string;
+    follow: string;
+    createdAt: Date;
+    isFollow: boolean;
+  }>;
+  public async isFollow(
+    idFollow: string,
+    userIdRequest: string
+  ): Promise<boolean>;
+  public async isFollow(arg1: unknown, arg2: unknown) {
+    if (typeof arg1 === "object") {
+      const followModel = arg1 as Follow;
+      const isFollow = followModel.userId.toString() === arg2;
+      return {
+        _id: followModel._id,
+        follow: followModel.follow,
+        createdAt: followModel.createdAt,
+        isFollow,
+      };
+    } else {
+      const found = await this.followModel.findOne({
+        follow: arg1,
+        userId: arg2,
+      });
+      return !!found;
+    }
   }
 
   public async unFollow(_idFollow: string, userRequest: User) {
@@ -163,17 +193,39 @@ export class FollowService {
     return await this.followModel.find({ follow: idUser }).populate("userId");
   }
 
-  public async getFollowing(idUser: string, cursor: string) {
+  public async getFollowing(idUser: string, idUserReq: string, cursor: string) {
     if (!cursor) {
-      return await this.followModel
+      const users = await this.followModel
         .find({ userId: idUser })
         .limit(10)
         .populate("follow");
+
+      // console.log(users.map((f) => this.isFollow(f, idUserReq)));
+      // return users.map((f) => {
+      //   const isFollow = f.userId.toString() === idUserReq;
+      //   return {
+      //     _id: f._id,
+      //     follow: f.follow,
+      //     createdAt: f.createdAt,
+      //     isFollow,
+      //   };
+      // });
+      return users.map(async (f) => await this.isFollow(f, idUserReq));
     }
 
-    return await this.followModel
+    const users = await this.followModel
       .find({ userId: idUser, _id: { $gt: cursor } })
       .limit(10)
       .populate("follow");
+
+    return users.map((f) => {
+      const isFollow = f.userId.toString() === idUserReq;
+      return {
+        _id: f._id,
+        follow: f.follow,
+        createdAt: f.createdAt,
+        isFollow,
+      };
+    });
   }
 }

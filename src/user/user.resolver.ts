@@ -9,6 +9,7 @@ import { CreateUserInput } from "./dto/input/create-user.input";
 import { DeleteUserInput } from "./dto/input/delete-user.input";
 import { LoginUserInput } from "./dto/input/login-user.input";
 import { Login } from "./dto/types/login-type";
+import { Username } from "./dto/types/username-type";
 import { User } from "./model/user.model";
 import { UserService } from "./user.service";
 
@@ -23,7 +24,7 @@ export class UserResolver {
     return user;
   }
 
-  @Query(() => User, { name: "userByUsername" })
+  @Query(() => Username, { name: "userByUsername" })
   async getUserByUsername(@Args() getUsernameArgs: GetUsernameArg) {
     return await this.userService.getUserByUsername(getUsernameArgs);
   }

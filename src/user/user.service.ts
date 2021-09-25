@@ -1,5 +1,7 @@
 import {
   BadRequestException,
+  forwardRef,
+  Inject,
   Injectable,
   NotFoundException,
   UnauthorizedException,
@@ -15,11 +17,14 @@ import { compare } from "bcrypt";
 import { MongoErrors } from "src/types";
 import { GetUsernameArg } from "./dto/args/username.args";
 import { SearchArg } from "./dto/args/search.args";
+import { FollowService } from "src/follow/follow.service";
 
 @Injectable()
 export class UserService {
   constructor(
     @InjectModel(User.name) private readonly userModel: Model<UserDocument>,
+    @Inject(forwardRef(() => FollowService))
+    private followService: FollowService,
     private jwtService: JwtService
   ) {}
 
@@ -61,13 +66,21 @@ export class UserService {
   public getUserById({ userId }: GetUserArgs): Promise<User> {
     return this.userModel.findById({ _id: userId }).exec();
   }
-  public async getUserByUsername({
-    username,
-    userReq,
-  }: GetUsernameArg): Promise<User> {
+  public async getUserByUsername({ username, userReq }: GetUsernameArg) {
     const user = await this.userModel.findOne({ username }).exec();
     if (!user) throw new NotFoundException("Usuario no encontrado");
-    return user;
+    if (userReq) {
+      const isFollow = await this.followService.isFollow(
+        user._id.toString(),
+        userReq
+      );
+      return {
+        user,
+        isFollow: !!isFollow,
+      };
+    }
+
+    return { user };
   }
 
   public searchUsers({ search }: SearchArg): Promise<User[]> {
