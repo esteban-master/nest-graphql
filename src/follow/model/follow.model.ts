@@ -16,12 +16,12 @@ export class Follow extends Document {
   @Prop({ type: SchemaMongo.Types.ObjectId, ref: "User" })
   @Field(() => User)
   @IsNotEmpty()
-  userId: string;
+  userId: User | string;
 
   @Prop({ type: SchemaMongo.Types.ObjectId, ref: "User" })
   @Field(() => User)
   @IsNotEmpty()
-  follow: string;
+  follow: User | string;
 
   @Prop({ type: Date, default: Date.now })
   @Field()

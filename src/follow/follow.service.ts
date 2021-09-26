@@ -92,29 +92,23 @@ export class FollowService {
     }
   }
 
-  public async isFollow(
-    followModel: Follow,
-    idUserReq: string
-  ): Promise<{
-    _id: string;
-    follow: string;
-    createdAt: Date;
-    isFollow: boolean;
-  }>;
-  public async isFollow(
-    idFollow: string,
-    userIdRequest: string
-  ): Promise<boolean>;
+  public async isFollow(followModel: Follow, idUserReq: string);
+  public async isFollow(idFollow: string, userIdRequest: string);
   public async isFollow(arg1: unknown, arg2: unknown) {
     if (typeof arg1 === "object") {
       const followModel = arg1 as Follow;
-      const isFollow = followModel.userId.toString() === arg2;
-      return {
-        _id: followModel._id,
-        follow: followModel.follow,
-        createdAt: followModel.createdAt,
-        isFollow,
-      };
+      if (typeof followModel.follow === "object") {
+        const isFollow = await this.followModel.findOne({
+          follow: followModel.follow._id.toString(),
+          userId: arg2,
+        });
+        return {
+          _id: followModel._id,
+          follow: followModel.follow,
+          createdAt: followModel.createdAt,
+          isFollow: !!isFollow,
+        };
+      }
     } else {
       const found = await this.followModel.findOne({
         follow: arg1,
@@ -199,17 +193,6 @@ export class FollowService {
         .find({ userId: idUser })
         .limit(10)
         .populate("follow");
-
-      // console.log(users.map((f) => this.isFollow(f, idUserReq)));
-      // return users.map((f) => {
-      //   const isFollow = f.userId.toString() === idUserReq;
-      //   return {
-      //     _id: f._id,
-      //     follow: f.follow,
-      //     createdAt: f.createdAt,
-      //     isFollow,
-      //   };
-      // });
       return users.map(async (f) => await this.isFollow(f, idUserReq));
     }
 
@@ -218,14 +201,6 @@ export class FollowService {
       .limit(10)
       .populate("follow");
 
-    return users.map((f) => {
-      const isFollow = f.userId.toString() === idUserReq;
-      return {
-        _id: f._id,
-        follow: f.follow,
-        createdAt: f.createdAt,
-        isFollow,
-      };
-    });
+    return users.map(async (f) => await this.isFollow(f, idUserReq));
   }
 }
