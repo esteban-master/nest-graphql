@@ -6,12 +6,12 @@ export class Follower {
   @Field()
   _id: string;
 
-  @Field()
-  follow: string;
-
   @Field(() => User)
   userId: User;
 
   @Field()
   createdAt: Date;
+
+  @Field()
+  isFollow: boolean;
 }

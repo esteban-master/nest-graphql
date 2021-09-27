@@ -92,22 +92,49 @@ export class FollowService {
     }
   }
 
-  public async isFollow(followModel: Follow, idUserReq: string);
-  public async isFollow(idFollow: string, userIdRequest: string);
-  public async isFollow(arg1: unknown, arg2: unknown) {
+  public async isFollow(
+    followModel: Follow,
+    idUserReq: string,
+    populate?: "userId" | "follow"
+  );
+  public async isFollow(
+    idFollow: string,
+    userIdRequest: string,
+    populate?: "userId" | "follow"
+  );
+  public async isFollow(arg1: unknown, arg2: unknown, arg3?: unknown) {
     if (typeof arg1 === "object") {
       const followModel = arg1 as Follow;
-      if (typeof followModel.follow === "object") {
-        const isFollow = await this.followModel.findOne({
-          follow: followModel.follow._id.toString(),
-          userId: arg2,
-        });
-        return {
-          _id: followModel._id,
-          follow: followModel.follow,
-          createdAt: followModel.createdAt,
-          isFollow: !!isFollow,
-        };
+      switch (arg3) {
+        case "follow":
+          if (typeof followModel.follow === "object") {
+            const isFollow = await this.followModel.findOne({
+              follow: followModel.follow._id.toString(),
+              userId: arg2,
+            });
+            return {
+              _id: followModel._id,
+              follow: followModel.follow,
+              createdAt: followModel.createdAt,
+              isFollow: !!isFollow,
+            };
+          }
+        case "userId":
+          if (typeof followModel.userId === "object") {
+            const isFollow = await this.followModel.findOne({
+              follow: followModel.userId._id.toString(),
+              userId: arg2,
+            });
+            return {
+              _id: followModel._id,
+              userId: followModel.userId,
+              createdAt: followModel.createdAt,
+              isFollow: !!isFollow,
+            };
+          }
+
+        default:
+          break;
       }
     } else {
       const found = await this.followModel.findOne({
@@ -183,8 +210,23 @@ export class FollowService {
     }
   }
 
-  public async getFollowers(idUser: string) {
-    return await this.followModel.find({ follow: idUser }).populate("userId");
+  public async getFollowers(idUser: string, idUserReq: string, cursor: string) {
+    if (!cursor) {
+      const users = await this.followModel
+        .find({ follow: idUser })
+        .limit(10)
+        .populate("userId");
+      return users.map(
+        async (f) => await this.isFollow(f, idUserReq, "userId")
+      );
+    }
+
+    const users = await this.followModel
+      .find({ follow: idUser, _id: { $gt: cursor } })
+      .limit(10)
+      .populate("userId");
+
+    return users.map(async (f) => await this.isFollow(f, idUserReq, "userId"));
   }
 
   public async getFollowing(idUser: string, idUserReq: string, cursor: string) {
@@ -193,7 +235,9 @@ export class FollowService {
         .find({ userId: idUser })
         .limit(10)
         .populate("follow");
-      return users.map(async (f) => await this.isFollow(f, idUserReq));
+      return users.map(
+        async (f) => await this.isFollow(f, idUserReq, "follow")
+      );
     }
 
     const users = await this.followModel
@@ -201,6 +245,6 @@ export class FollowService {
       .limit(10)
       .populate("follow");
 
-    return users.map(async (f) => await this.isFollow(f, idUserReq));
+    return users.map(async (f) => await this.isFollow(f, idUserReq, "follow"));
   }
 }

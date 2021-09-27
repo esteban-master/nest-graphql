@@ -10,6 +10,7 @@ import { Follower } from "./dto/followers-type";
 import { Following } from "./dto/following-type";
 import { FollowService } from "./follow.service";
 import { FollowingPaginate } from "./dto/followingPaginate-type";
+import { FollowersPaginate } from "./dto/followerPaginate-type";
 
 @Resolver()
 export class FollowResolver {
@@ -33,21 +34,19 @@ export class FollowResolver {
     return await this.followService.unFollow(_id, userRequest);
   }
 
-  // @Query(() => Boolean)
-  // @UseGuards(JwtAuthGuard)
-  // async isfollow(
-  //   @Args("_id", { type: () => String }, IsValidId) _id: string,
-  //   @CurrentUser() userRequest: User
-  // ) {
-  //   const isFollow = await this.followService.isFollow(_id, userRequest._id);
-  //   return !!isFollow;
-  // }
-
-  @Query(() => [Follower])
+  @Query(() => FollowersPaginate)
   async followers(
-    @Args("idUser", { type: () => String }, IsValidId) idUser: string
+    @Args("idUser", { type: () => String }, IsValidId) idUser: string,
+    @Args("idUserReq", { type: () => String }, IsValidId) idUserReq: string,
+    @Args("cursor", { type: () => String, nullable: true }) cursor?: string
   ) {
-    return await this.followService.getFollowers(idUser);
+    const followers = await Promise.all(
+      await this.followService.getFollowers(idUser, idUserReq, cursor)
+    );
+    return {
+      data: followers,
+      nextCursor: followers[9] ? followers[9]._id : null,
+    };
   }
 
   @Query(() => FollowingPaginate)

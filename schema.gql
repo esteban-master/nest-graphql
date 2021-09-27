@@ -41,13 +41,6 @@ type UnFollow {
   unFollow: User
 }
 
-type Follower {
-  _id: String!
-  follow: String!
-  userId: User!
-  createdAt: DateTime!
-}
-
 type Following {
   _id: String!
   follow: User!
@@ -57,6 +50,18 @@ type Following {
 
 type FollowingPaginate {
   data: [Following!]!
+  nextCursor: String
+}
+
+type Follower {
+  _id: String!
+  userId: User!
+  createdAt: DateTime!
+  isFollow: Boolean!
+}
+
+type FollowersPaginate {
+  data: [Follower!]!
   nextCursor: String
 }
 
@@ -75,7 +80,7 @@ type Query {
 
   """Obtiene busqueda de los usuario por nombre"""
   searchUsers(search: String!): [User]!
-  followers(idUser: String!): [Follower!]!
+  followers(cursor: String, idUserReq: String!, idUser: String!): FollowersPaginate!
   following(cursor: String, idUserReq: String!, idUser: String!): FollowingPaginate!
   postsByUsername(username: String!): [Post!]!
 }
