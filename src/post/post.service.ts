@@ -1,17 +1,19 @@
 import { Injectable, InternalServerErrorException } from "@nestjs/common";
 import { InjectModel } from "@nestjs/mongoose";
-import { Model } from "mongoose";
+import { Model, Types } from "mongoose";
 import { CreatePostInput } from "./dto/create-post.input";
 import { Post, PostDocument } from "./model/post.model";
 import { v2 } from "cloudinary";
 import { UserService } from "src/user/user.service";
+import { FollowService } from "src/follow/follow.service";
 
 @Injectable()
 export class PostService {
   private v2: any;
   constructor(
     @InjectModel(Post.name) private readonly postModel: Model<PostDocument>,
-    private readonly userService: UserService
+    private readonly userService: UserService,
+    private readonly followService: FollowService
   ) {
     v2.config({
       cloud_name: "dlsuecuz3",
@@ -46,5 +48,47 @@ export class PostService {
       .populate("postedBy")
       .populate("likes")
       .exec();
+  }
+
+  public async feedTimeline(idUser: string, cursor?: string) {
+    const ids = await this.followService.getFollowingNoPaginate(idUser);
+    if (!cursor) {
+      return await this.postModel.aggregate([
+        { $match: { postedBy: { $in: ids } } },
+        { $sort: { createdAt: -1 } },
+        { $limit: 10 },
+        {
+          $lookup: {
+            from: "users",
+            localField: "postedBy",
+            foreignField: "_id",
+            as: "postedBy",
+          },
+        },
+        { $unwind: "$postedBy" },
+        { $project: { postedBy: { password: 0 } } },
+      ]);
+    }
+
+    return await this.postModel.aggregate([
+      {
+        $match: {
+          postedBy: { $in: ids },
+          _id: { $lt: new Types.ObjectId(cursor) },
+        },
+      },
+      { $sort: { createdAt: -1 } },
+      { $limit: 10 },
+      {
+        $lookup: {
+          from: "users",
+          localField: "postedBy",
+          foreignField: "_id",
+          as: "postedBy",
+        },
+      },
+      { $unwind: "$postedBy" },
+      { $project: { postedBy: { password: 0 } } },
+    ]);
   }
 }

@@ -74,6 +74,11 @@ type Post {
   createdAt: DateTime!
 }
 
+type Feed {
+  data: [Post!]!
+  nextCursor: String
+}
+
 type Query {
   userById(userId: String!): User!
   userByUsername(username: String!, userReq: String): Username!
@@ -83,6 +88,11 @@ type Query {
   followers(cursor: String, idUserReq: String!, idUser: String!): FollowersPaginate!
   following(cursor: String, idUserReq: String!, idUser: String!): FollowingPaginate!
   postsByUsername(username: String!): [Post!]!
+  feed(feedInput: FeedInput!): Feed!
+}
+
+input FeedInput {
+  cursor: String
 }
 
 type Mutation {

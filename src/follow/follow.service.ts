@@ -247,4 +247,13 @@ export class FollowService {
 
     return users.map(async (f) => await this.isFollow(f, idUserReq, "follow"));
   }
+
+  public async getFollowingNoPaginate(idUser: string) {
+    const following = (await this.followModel.find(
+      { userId: idUser },
+      { follow: 1, _id: 0 }
+    )) as { follow: any }[];
+    const ids = following.map((f) => f.follow);
+    return ids;
+  }
 }

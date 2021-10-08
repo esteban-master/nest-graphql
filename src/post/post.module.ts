@@ -4,6 +4,7 @@ import { PostResolver } from "./post.resolver";
 import { MongooseModule } from "@nestjs/mongoose";
 import { Post, PostSchema } from "./model/post.model";
 import { UserModule } from "src/user/user.module";
+import { FollowModule } from "src/follow/follow.module";
 
 @Module({
   imports: [
@@ -14,6 +15,7 @@ import { UserModule } from "src/user/user.module";
       },
     ]),
     UserModule,
+    FollowModule,
   ],
   providers: [PostResolver, PostService],
 })
