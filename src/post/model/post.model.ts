@@ -1,8 +1,9 @@
 import { Field, ObjectType } from "@nestjs/graphql";
-import { Prop, Schema, SchemaFactory } from "@nestjs/mongoose";
+import { Prop, raw, Schema, SchemaFactory } from "@nestjs/mongoose";
 import { IsNotEmpty, IsArray } from "class-validator";
 import { Document, Schema as SchemaMongo } from "mongoose";
 import { User } from "src/user/model/user.model";
+import { Comment } from "../dto/commentType";
 
 export type PostDocument = Post & Document;
 
@@ -31,6 +32,23 @@ export class Post extends Document {
   @IsNotEmpty()
   @IsArray()
   likes: User[];
+
+  @Prop(
+    raw([
+      {
+        text: { type: String },
+        postedBy: {
+          type: SchemaMongo.Types.ObjectId,
+          ref: "User",
+          required: true,
+        },
+        createdAt: { type: Date, default: Date.now },
+      },
+    ])
+  )
+  @Field(() => [Comment])
+  @IsArray()
+  comments: Comment[];
 
   @Prop({ type: SchemaMongo.Types.ObjectId, ref: "User", required: true })
   @Field(() => User)

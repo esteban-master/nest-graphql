@@ -8,6 +8,8 @@ import { JwtAuthGuard } from "src/user/guards/jwt-auth.guard";
 import { CurrentUser } from "src/user/decorators/user.decorator";
 import { User } from "src/user/model/user.model";
 import { FeedInput } from "./dto/feedInput";
+import { CreateCommentInput } from "./dto/createCommentInput";
+import { DeleteCommentInput } from "./dto/deleteCommentInput";
 
 @Resolver()
 export class PostResolver {
@@ -34,5 +36,44 @@ export class PostResolver {
       data: posts,
       nextCursor: posts[9] ? posts[9]._id : null,
     };
+  }
+
+  @Mutation(() => Post)
+  @UseGuards(JwtAuthGuard)
+  async commentPost(
+    @Args("createCommentData") createCommentData: CreateCommentInput,
+    @CurrentUser() userRequest: User
+  ) {
+    return await this.postService.commentPost(createCommentData, userRequest);
+  }
+
+  @Mutation(() => Boolean)
+  @UseGuards(JwtAuthGuard)
+  async deleteCommentPost(
+    @Args("deleteCommentData") deleteCommentData: DeleteCommentInput,
+    @CurrentUser() userRequest: User
+  ) {
+    return await this.postService.deleteCommentPost(
+      deleteCommentData,
+      userRequest
+    );
+  }
+
+  @Mutation(() => Boolean)
+  @UseGuards(JwtAuthGuard)
+  async likePost(
+    @Args("idPost") idPost: string,
+    @CurrentUser() userRequest: User
+  ) {
+    return await this.postService.likePost(idPost, userRequest);
+  }
+
+  @Mutation(() => Boolean)
+  @UseGuards(JwtAuthGuard)
+  async dislikePost(
+    @Args("idPost") idPost: string,
+    @CurrentUser() userRequest: User
+  ) {
+    return await this.postService.dislikePost(idPost, userRequest);
   }
 }

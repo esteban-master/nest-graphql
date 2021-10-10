@@ -12,7 +12,6 @@ type User {
   avatar: String
   siteWeb: String
   desc: String
-  password: String
   createdAt: DateTime!
 }
 
@@ -65,11 +64,19 @@ type FollowersPaginate {
   nextCursor: String
 }
 
+type Comment {
+  _id: String!
+  postedBy: User!
+  text: String!
+  createdAt: DateTime!
+}
+
 type Post {
   _id: String!
   text: String
   photo: String!
   likes: [User!]!
+  comments: [Comment!]!
   postedBy: User!
   createdAt: DateTime!
 }
@@ -102,6 +109,10 @@ type Mutation {
   follow(_id: String!): Follow!
   unFollow(_id: String!): UnFollow!
   createPost(createPostData: CreatePostInput!): Post!
+  commentPost(createCommentData: CreateCommentInput!): Post!
+  deleteCommentPost(deleteCommentData: DeleteCommentInput!): Boolean!
+  likePost(idPost: String!): Boolean!
+  dislikePost(idPost: String!): Boolean!
 }
 
 input CreateUserInput {
@@ -124,4 +135,15 @@ input CreatePostInput {
   text: String
   photo: String!
   postedBy: String!
+}
+
+input CreateCommentInput {
+  idPost: String!
+  text: String!
+}
+
+input DeleteCommentInput {
+  idPost: String!
+  idPostedBy: String!
+  idComment: String!
 }

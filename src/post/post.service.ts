@@ -1,4 +1,8 @@
-import { Injectable, InternalServerErrorException } from "@nestjs/common";
+import {
+  Injectable,
+  InternalServerErrorException,
+  NotFoundException,
+} from "@nestjs/common";
 import { InjectModel } from "@nestjs/mongoose";
 import { Model, Types } from "mongoose";
 import { CreatePostInput } from "./dto/create-post.input";
@@ -6,6 +10,9 @@ import { Post, PostDocument } from "./model/post.model";
 import { v2 } from "cloudinary";
 import { UserService } from "src/user/user.service";
 import { FollowService } from "src/follow/follow.service";
+import { CreateCommentInput } from "./dto/createCommentInput";
+import { User } from "src/user/model/user.model";
+import { DeleteCommentInput } from "./dto/deleteCommentInput";
 
 @Injectable()
 export class PostService {
@@ -90,5 +97,91 @@ export class PostService {
       { $unwind: "$postedBy" },
       { $project: { postedBy: { password: 0 } } },
     ]);
+  }
+
+  public async likePost(idPost: string, userRequest: User) {
+    try {
+      await this.postModel.findOneAndUpdate(
+        { _id: idPost },
+        {
+          $addToSet: {
+            likes: userRequest,
+          },
+        }
+      );
+      return true;
+    } catch (error) {
+      throw new InternalServerErrorException("Error al dar like al post");
+    }
+  }
+  public async dislikePost(idPost: string, userRequest: User) {
+    try {
+      await this.postModel.findOneAndUpdate(
+        { _id: idPost },
+        {
+          $pull: {
+            likes: userRequest._id,
+          },
+        }
+      );
+      return true;
+    } catch (error) {
+      throw new InternalServerErrorException("Error al dar dislike al post");
+    }
+  }
+
+  public async commentPost(
+    { idPost, text }: CreateCommentInput,
+    userRequest: User
+  ) {
+    try {
+      const postUpdate = await this.postModel
+        .findOneAndUpdate(
+          { _id: idPost },
+          {
+            $push: {
+              comments: {
+                text,
+                postedBy: userRequest._id,
+                createdAt: new Date(),
+              },
+            },
+          },
+          {
+            new: true,
+          }
+        )
+        .populate("comments.postedBy")
+        .populate("postedBy");
+      return postUpdate;
+    } catch (error) {
+      throw new InternalServerErrorException("Error al comentar el post");
+    }
+  }
+
+  public async deleteCommentPost(
+    { idComment, idPostedBy, idPost }: DeleteCommentInput,
+    userRequest: User
+  ) {
+    const isOwner = idPostedBy === userRequest._id.toString();
+    if (!isOwner) {
+      return false;
+    }
+    try {
+      await this.postModel.findOneAndUpdate(
+        { _id: idPost },
+        {
+          $pull: {
+            comments: {
+              _id: idComment,
+            },
+          },
+        }
+      );
+
+      return true;
+    } catch (error) {
+      throw new InternalServerErrorException("Error al comentar el post");
+    }
   }
 }

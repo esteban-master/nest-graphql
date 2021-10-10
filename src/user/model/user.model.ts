@@ -56,7 +56,6 @@ export class User extends Document {
   desc?: string;
 
   @Prop({ required: true })
-  @Field({ nullable: true })
   @IsNotEmpty()
   password?: string;
 
