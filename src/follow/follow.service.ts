@@ -253,7 +253,7 @@ export class FollowService {
       { userId: idUser },
       { follow: 1, _id: 0 }
     )) as { follow: any }[];
-    const ids = following.map((f) => f.follow);
+    const ids = following.map((f) => f.follow).concat(idUser);
     return ids;
   }
 }

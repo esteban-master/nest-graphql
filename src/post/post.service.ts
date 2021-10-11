@@ -1,8 +1,4 @@
-import {
-  Injectable,
-  InternalServerErrorException,
-  NotFoundException,
-} from "@nestjs/common";
+import { Injectable, InternalServerErrorException } from "@nestjs/common";
 import { InjectModel } from "@nestjs/mongoose";
 import { Model, Types } from "mongoose";
 import { CreatePostInput } from "./dto/create-post.input";
@@ -54,77 +50,62 @@ export class PostService {
       .sort({ createdAt: -1 })
       .populate("postedBy")
       .populate("likes")
+      .populate("comments.postedBy")
       .exec();
   }
 
   public async feedTimeline(idUser: string, cursor?: string) {
     const ids = await this.followService.getFollowingNoPaginate(idUser);
-    if (!cursor) {
-      return await this.postModel.aggregate([
-        { $match: { postedBy: { $in: ids } } },
-        { $sort: { createdAt: -1 } },
-        { $limit: 10 },
-        {
-          $lookup: {
-            from: "users",
-            localField: "postedBy",
-            foreignField: "_id",
-            as: "postedBy",
-          },
-        },
-        { $unwind: "$postedBy" },
-        { $project: { postedBy: { password: 0 } } },
-      ]);
-    }
-
-    return await this.postModel.aggregate([
-      {
-        $match: {
+    const condicion = cursor
+      ? {
           postedBy: { $in: ids },
           _id: { $lt: new Types.ObjectId(cursor) },
-        },
-      },
-      { $sort: { createdAt: -1 } },
-      { $limit: 10 },
-      {
-        $lookup: {
-          from: "users",
-          localField: "postedBy",
-          foreignField: "_id",
-          as: "postedBy",
-        },
-      },
-      { $unwind: "$postedBy" },
-      { $project: { postedBy: { password: 0 } } },
-    ]);
+        }
+      : { postedBy: { $in: ids } };
+    return await this.postModel
+      .find(condicion)
+      .sort({ createdAt: -1 })
+      .limit(10)
+      .populate("postedBy")
+      .populate("likes")
+      .populate("comments.postedBy");
   }
 
   public async likePost(idPost: string, userRequest: User) {
     try {
-      await this.postModel.findOneAndUpdate(
-        { _id: idPost },
-        {
-          $addToSet: {
-            likes: userRequest,
+      const postUpdate = await this.postModel
+        .findOneAndUpdate(
+          { _id: idPost },
+          {
+            $addToSet: {
+              likes: userRequest,
+            },
           },
-        }
-      );
-      return true;
+          {
+            new: true,
+          }
+        )
+        .populate("likes");
+      return postUpdate;
     } catch (error) {
       throw new InternalServerErrorException("Error al dar like al post");
     }
   }
   public async dislikePost(idPost: string, userRequest: User) {
     try {
-      await this.postModel.findOneAndUpdate(
-        { _id: idPost },
-        {
-          $pull: {
-            likes: userRequest._id,
+      return await this.postModel
+        .findOneAndUpdate(
+          { _id: idPost },
+          {
+            $pull: {
+              likes: userRequest._id,
+            },
           },
-        }
-      );
-      return true;
+          {
+            new: true,
+          }
+        )
+        .populate("likes");
     } catch (error) {
       throw new InternalServerErrorException("Error al dar dislike al post");
     }
@@ -151,8 +132,10 @@ export class PostService {
             new: true,
           }
         )
+        .populate("likes")
         .populate("comments.postedBy")
         .populate("postedBy");
+
       return postUpdate;
     } catch (error) {
       throw new InternalServerErrorException("Error al comentar el post");
@@ -176,7 +159,8 @@ export class PostService {
               _id: idComment,
             },
           },
-        }
+        },
+        { new: true }
       );
 
       return true;

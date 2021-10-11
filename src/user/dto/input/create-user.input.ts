@@ -13,6 +13,9 @@ export class CreateUserInput {
   @MinLength(5, { message: "El nombre debe ser mayor a 5 caracteres" })
   name: string;
 
+  @Field({ nullable: true })
+  avatar?: string;
+
   @Field()
   @IsNotEmpty()
   @MinLength(5, { message: "El password debe ser mayor a 5 caracteres" })

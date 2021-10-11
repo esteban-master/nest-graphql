@@ -59,7 +59,7 @@ export class PostResolver {
     );
   }
 
-  @Mutation(() => Boolean)
+  @Mutation(() => Post)
   @UseGuards(JwtAuthGuard)
   async likePost(
     @Args("idPost") idPost: string,
@@ -68,7 +68,7 @@ export class PostResolver {
     return await this.postService.likePost(idPost, userRequest);
   }
 
-  @Mutation(() => Boolean)
+  @Mutation(() => Post)
   @UseGuards(JwtAuthGuard)
   async dislikePost(
     @Args("idPost") idPost: string,

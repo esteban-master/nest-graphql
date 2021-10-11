@@ -111,13 +111,14 @@ type Mutation {
   createPost(createPostData: CreatePostInput!): Post!
   commentPost(createCommentData: CreateCommentInput!): Post!
   deleteCommentPost(deleteCommentData: DeleteCommentInput!): Boolean!
-  likePost(idPost: String!): Boolean!
-  dislikePost(idPost: String!): Boolean!
+  likePost(idPost: String!): Post!
+  dislikePost(idPost: String!): Post!
 }
 
 input CreateUserInput {
   email: String!
   name: String!
+  avatar: String
   password: String!
   username: String!
 }
